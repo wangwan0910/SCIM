@@ -1,207 +1,40 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Sep 19 09:54:41 2024
-
 @author: ww1a23
 """
 
  
- 
- 
-
-# -*- coding: utf-8 -*-  
-
- 
- 
-
-"""  
-
- 
- 
-
-Created on Wed Sep 18 13:30:25 2024  
-
- 
- 
-
-   
-
- 
- 
-
-@author: ww1a23  
-
- 
- 
-
-"""  
-
- 
- 
-
+import time
 import ray  
-
- 
- 
-
+import argparse
 from ray import air  
-
- 
- 
-
 from ray import tune  
-
- 
- 
-
 from ray.tune.logger import pretty_print  
-
- 
- 
-
 from ray.rllib.algorithms.ppo import PPOConfig  
-
- 
- 
-
 from ray.rllib.algorithms.dqn import DQNConfig  
-
- 
- 
-
 import gymnasium  
-
- 
- 
-
-from gym.spaces import Discrete,MultiDiscrete   
-
- 
- 
-
+from gymnasium.spaces import Discrete,MultiDiscrete   
 import os  
-
- 
- 
-
-from gym.utils import seeding   
-
- 
- 
-
-import numpy as np   
-
- 
- 
-
-import logging   
-
- 
- 
-
-from datetime import datetime  
-
- 
- 
-
-import logging  
-
- 
- 
-
-import numpy as np  
-
- 
- 
-
-from singlesc import POSingAgent1W1F  
-
- 
- 
-
-from ray.tune.schedulers import ASHAScheduler  
-
- 
- 
-
-from ray.tune.stopper import (CombinedStopper,  
-
- 
- 
-
-                              MaximumIterationStopper,  
-
- 
- 
-
-                              ExperimentPlateauStopper)  
-
- 
- 
-
-import ray.rllib.algorithms.ppo as ppo  
-
- 
- 
-
-from ray.rllib.utils import try_import_torch  
-
- 
- 
-
-logger = logging.getLogger(__name__)   
-
- 
- 
-
-   
-
- 
- 
-
-   
-
- 
- 
-
- 
-import ray  
-from ray import air  
-from ray import tune  
-from ray.tune.logger import pretty_print  
-from ray.rllib.algorithms.ppo import PPOConfig  
-from ray.rllib.algorithms.dqn import DQNConfig  
-import gym  
-from gym.spaces import Discrete,MultiDiscrete   
-import os  
-from gym.utils import seeding   
+from gymnasium.utils import seeding   
 import numpy as np   
 import logging   
 from datetime import datetime  
 import logging  
 import numpy as np  
-from sgymnasi import POSingAgent1W1F  
+from sgymnasi import (POSingAgent1W1F,POSAgent1W1F_V1T1,POSAgent1W1F_V1T2,POSAgent1W1F_V1T3,
+                      POSAgent1W1F_V2T1,POSAgent1W1F_V2T2,POSAgent1W1F_V2T3,
+                      POSAgent1W1F_V3T1,POSAgent1W1F_V3T2,POSAgent1W1F_V3T3)
 from ray.tune.schedulers import ASHAScheduler  
-
 from ray.tune.stopper import (CombinedStopper,  
                               MaximumIterationStopper,  
                               ExperimentPlateauStopper)  
-
- 
 import ray.rllib.algorithms.ppo as ppo  
-from ray.rllib.utils import try_import_torch  
+from ray.rllib.utils import try_import_torch   
 
 logger = logging.getLogger(__name__)   
 
- 
- 
-
-class GymEnvironment(POSingAgent1W1F, gymnasium.Env):  
-    def __init__(self, *args, **kwargs):  
-        super().__init__(*args, **kwargs)  
-
-
-env = GymEnvironment()  
+# env = GymEnvironment()  
 
 from ray.tune.logger import pretty_print 
 import os 
@@ -214,31 +47,15 @@ from ray.tune.stopper import CombinedStopper, MaximumIterationStopper, Experimen
 import logging 
 import numpy as np 
 # from scenv0703 import SupplyChainEnvironment, Action, State 
-
 # from plotrewards0803 import visualize_rewards 
-
 from ray.rllib.env.multi_agent_env import MultiAgentEnv 
 from ray.tune.registry import register_env 
 from ray.rllib.algorithms.ppo import PPO 
 # Register the environment if not already registered 
-
 import torch 
 from ray.rllib.policy.sample_batch import SampleBatch 
 import numpy as np 
 
-env_instance = GymEnvironment() 
-NUM_EPISODES = 250 
-num_episodes_ray = 7500 
-grace_period_ray = num_episodes_ray / 10 
-std_episodes_ray = 5 
-top_episodes_ray = NUM_EPISODES 
-SEED = 2023 
-
-plots_dir = 'plots' 
-now = datetime.now() 
-now_str = now.strftime("%Y-%m-%d_%H-%M-%S") 
-ray_dir = 'ray_results' 
-local_dir = f"{env_instance.s}P{env_instance.task}W_{now_str}" 
 
  
  
@@ -249,7 +66,7 @@ def trial_dirname_creator(trial):
  
  
 
-def train_multi_agent(config, verbose, num_episodes_ray, grace_period_ray, std_episodes_ray, top_episodes_ray, 
+def train_agent(config, verbose, num_episodes_ray, grace_period_ray, std_episodes_ray, top_episodes_ray, 
                       local_dir, ray_dir): 
     ray.shutdown() 
     ray.init(log_to_driver=False) 
@@ -290,19 +107,72 @@ def train_multi_agent(config, verbose, num_episodes_ray, grace_period_ray, std_e
  
  
  
+
+  
  
- 
- 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="POSAgent1W1F Environment Configuration")
+    parser.add_argument('--env1', action='store_true', help='Use POSAgent1W1F_V1T1 environment')
+    parser.add_argument('--env2', action='store_true', help='Use POSAgent1W1F_V1T2 environment')
+    parser.add_argument('--env3', action='store_true', help='Use POSAgent1W1F_V1T3 environment')
+    parser.add_argument('--env4', action='store_true', help='Use POSAgent1W1F_V2T1 environment')
+    parser.add_argument('--env5', action='store_true', help='Use POSAgent1W1F_V2T2 environment')
+    parser.add_argument('--env6', action='store_true', help='Use POSAgent1W1F_V2T3 environment')
+    parser.add_argument('--env7', action='store_true', help='Use POSAgent1W1F_V3T1 environment')
+    parser.add_argument('--env8', action='store_true', help='Use POSAgent1W1F_V3T2 environment')
+    parser.add_argument('--env9', action='store_true', help='Use POSAgent1W1F_V3T3 environment')
+    return parser.parse_args() 
  
 
 if __name__ == '__main__': 
+    
+    # env_instance = GymEnvironment() 
+    NUM_EPISODES = 250 
+    num_episodes_ray = 7500 
+    grace_period_ray = num_episodes_ray / 10 
+    std_episodes_ray = 5 
+    top_episodes_ray = NUM_EPISODES 
+    SEED = 2023 
+    
+    plots_dir = 'plots' 
+    now = datetime.now() 
+    now_str = now.strftime("%Y-%m-%d_%H-%M-%S") 
+    ray_dir = 'ray_results' 
+    
     num_episodes_ray = 7500 
     grace_period_ray = num_episodes_ray / 10 
     std_episodes_ray = 5.0 
     top_episodes_ray = NUM_EPISODES 
-    env_instance = GymEnvironment() 
+    
+    args = parse_args()
+    
+    if args.env1:
+        envs = POSAgent1W1F_V1T1
+    elif args.env2:
+        envs = POSAgent1W1F_V1T2
+    elif args.env3:
+        envs = POSAgent1W1F_V1T3
+    elif args.env4:
+        envs = POSAgent1W1F_V2T1
+    elif args.env5:
+        envs = POSAgent1W1F_V2T2
+    elif args.env6:
+        envs = POSAgent1W1F_V2T3
+    elif args.env7:
+        envs = POSAgent1W1F_V3T1
+    elif args.env8:
+        envs = POSAgent1W1F_V3T2
+    elif args.env9:
+        envs = POSAgent1W1F_V3T3
+    else:
+        raise ValueError("Please specify one of --env1, ..., --env6")
+
+
+    env_instance = envs() 
+    local_dir = f"{env_instance.s}P{env_instance.task}W_{now_str}" 
     def env_creator(env_config): 
-        return GymEnvironment() 
+        return envs() 
     register_env("supply_chain_env", env_creator) 
 
 
@@ -346,14 +216,18 @@ if __name__ == '__main__':
  
  
 
-    logger = logging.getLogger('LOGGING_SCIMAI_GYM_VS') 
+    # logger = logging.getLogger('LOGGING_SCIMAI_GYM_VS') 
     logger.setLevel((logging.INFO)) 
     VERBOSE = 3 if logger.level == 10 else 0 
 
     # Training 
-    results_df, best_result, best_config, checkpoint = train_multi_agent( 
+    start = time.time()
+    results_df, best_result, best_config, checkpoint = train_agent( 
         config, VERBOSE, num_episodes_ray, grace_period_ray, std_episodes_ray, top_episodes_ray, local_dir, ray_dir 
     ) 
+    total_time_taken = time.time()-start
+  
+    print(f"Total time taken: {total_time_taken/60:.2f} minutes")
     print('results_df',results_df)
     print('best_result',best_result)
     print('best_config',best_config)
